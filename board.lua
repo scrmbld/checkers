@@ -35,6 +35,11 @@ function Board:new(x, y, turn)
 			{ 3, 0, 3, 0, 3, 0, 3, 0 },
 			{ 0, 3, 0, 3, 0, 3, 0, 3 },
 		},
+
+		p1_remaining = 8,
+		p2_remaining = 8,
+		p1_taken = 0,
+		p2_taken = 0,
 	}
 
 	newObj.width = newObj.sp_background:getWidth()
@@ -253,7 +258,6 @@ function Board:isPossible(m)
 	elseif m.magnitude == 2 then
 		-- it's ok to not use integer division because difference is always divisible by 2
 		local middle = getMidpoint(m)
-		print("middle cell: " .. tostring(middle) .. " | " .. self.state[middle.y][middle.x])
 
 		return self:isEnemy(m.start, middle)
 	end
@@ -295,8 +299,6 @@ function Board:getLegalMoves()
 					if current_move.magnitude == 2 then
 						is_jump = true
 					end
-
-					print(is_jump)
 
 					-- append current move to a moves set
 					-- if current move is not a jump and the moves set has a jump, don't append
@@ -362,8 +364,6 @@ end
 function Board:mousepressed(x, y, button)
 	self:getLegalMoves()
 
-	print(self.selected)
-
 	-- middle mouse does nothing
 	if button == 3 then
 		return
@@ -409,6 +409,32 @@ function Board:nextTurn()
 	end
 
 	self.selected = nil
+	self:countRemaining()
+	print(self.p1_taken .. ", " .. self.p1_remaining .. " | " .. self.p2_taken .. ", " .. self.p2_remaining)
+end
+
+---computes the remaining pieces on the board for each player
+function Board:countRemaining()
+	local p1_pieces = Set:new({ 1, 2 })
+	local p2_pieces = Set:new({ 3, 4 })
+	local p1_count = 0
+	local p2_count = 0
+	for i, row in ipairs(self.state) do
+		for j, cell in ipairs(row) do
+			if p1_pieces[cell] == true then
+				p1_count = p1_count + 1
+			end
+			if p2_pieces[cell] == true then
+				p2_count = p2_count + 1
+			end
+		end
+	end
+
+	self.p1_taken = self.p1_taken + (self.p2_remaining - p2_count)
+	self.p2_taken = self.p2_taken + (self.p1_remaining - p1_count)
+
+	self.p1_remaining = p1_count
+	self.p2_remaining = p2_count
 end
 
 return Board
