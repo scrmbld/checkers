@@ -1,6 +1,7 @@
 local Set = require("set")
 local Coords = require("coords")
 local Move = require("move")
+local Timer = require("timer")
 
 ---Get the midpoint between the two coordinates.
 local function getMidpoint(m)
@@ -40,6 +41,7 @@ function Board:new(x, y, turn)
 		p2_remaining = 8,
 		p1_taken = 0,
 		p2_taken = 0,
+		move_count = 0,
 	}
 
 	newObj.width = newObj.sp_background:getWidth()
@@ -47,6 +49,8 @@ function Board:new(x, y, turn)
 
 	newObj.cell_h = math.floor(newObj.height / #newObj.state)
 	newObj.cell_w = math.floor(newObj.width / #newObj.state[1])
+
+	newObj.game_timer = Timer:new(newObj.x + newObj.width + 20, 20, 5, 0)
 
 	-- TODO: add assets for kings
 	newObj.piece_sprites = {
@@ -72,6 +76,17 @@ function Board:new(x, y, turn)
 	return newObj
 end
 
+function Board:update(delta)
+	local flag = self.game_timer:update(delta)
+	if flag == true then
+		if self.turn == 1 then
+			print("Blue wins")
+		else
+			print("Red wins")
+		end
+	end
+end
+
 function Board:draw()
 	-- first, draw the board
 	love.graphics.draw(self.sp_background, self.x, self.y)
@@ -91,6 +106,10 @@ function Board:draw()
 		end
 	end
 
+	-- next, draw the timer
+	self.game_timer:draw()
+
+	-- finally, movement guides
 	if self.selected then
 		self:renderGuides()
 	end
@@ -354,6 +373,8 @@ function Board:move(m)
 
 		self:nextTurn()
 
+		self.move_count = self.move_count + 1
+
 		return true
 	end
 
@@ -402,15 +423,20 @@ function Board:mousepressed(x, y, button)
 end
 
 function Board:nextTurn()
+	-- update turn
 	if self.turn == 1 then
 		self.turn = 2
 	else
 		self.turn = 1
 	end
 
+
+	-- deselect current piece
 	self.selected = nil
 	self:countRemaining()
-	print(self.p1_taken .. ", " .. self.p1_remaining .. " | " .. self.p2_taken .. ", " .. self.p2_remaining)
+
+	-- update timer
+	self.game_timer:start(self.turn)
 end
 
 ---computes the remaining pieces on the board for each player

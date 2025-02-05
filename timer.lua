@@ -59,6 +59,7 @@ function Timer:new(x, y, start_time, increment)
 		y = y,
 		-- sprites
 		body = love.graphics.newImage("images/timer.png"),
+		occluder = love.graphics.newImage("images/timer_occluder.png"),
 		-- initial values for actual timing
 		player_times = { start_time, start_time },
 		increment = increment,
@@ -83,7 +84,10 @@ function Timer:update(delta)
 	-- step the timer
 	if self.turn ~= nil and (self.turn == 1 or self.turn == 2) then
 		self.player_times[self.turn] = self.player_times[self.turn] - delta
-		return self.player_times[self.turn] <= 0.0
+		if self.player_times[self.turn] <= 0.0 then
+			self.player_times[self.turn] = 0.0
+			return true
+		end
 	end
 	return false
 end
@@ -96,12 +100,36 @@ function Timer:draw()
 	love.graphics.draw(self.body, self.x, self.y)
 	love.graphics.draw(self.p1_display, self.x + 50, self.y + 130, 0, 3, 3)
 	love.graphics.draw(self.p2_display, self.x + 50, self.y + 480, 0, 3, 3)
+
+	if self.turn == nil then
+		love.graphics.draw(self.occluder, self.x + self.width * (17 / 32), self.y + self.height * (28 / 64))
+	elseif self.turn == 1 then
+		love.graphics.draw(self.occluder, self.x + self.width * (17 / 32), self.y + self.height * (28 / 64))
+	elseif self.turn == 2 then
+		love.graphics.draw(self.occluder, self.x + self.width * (6 / 32), self.y + self.height * (28 / 64))
+	end
 end
 
----Starts running the timer, with it being player_id's turn
+---Starts running the timer, with it being player_id's turn.
 ---@param player_id number
-function Timer:start(player_id)
+---@param increment number? Whether or not to apply the increment to the other player's clock. Default true.
+function Timer:start(player_id, increment)
+	assert(player_id ~= nil)
+
+	if increment ~= false then
+		if player_id == 1 then
+			self.player_times[2] = self.player_times[2] + self.increment
+		else
+			self.player_times[1] = self.player_times[1] + self.increment
+		end
+	end
+
 	self.turn = player_id
+end
+
+---Pause the timer. To unpause, call Timer:start and pass in a player id
+function Timer:stop()
+	self.turn = nil
 end
 
 return Timer
