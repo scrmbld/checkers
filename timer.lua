@@ -2,7 +2,7 @@ local Timer = {
 	name = "Timer"
 }
 
-local font = love.graphics.getFont()
+local font = UnifontEX
 
 local function leftPad(s, c)
 
@@ -98,8 +98,8 @@ function Timer:draw()
 	self.p2_display:set(secsToClock(self.player_times[2]))
 
 	love.graphics.draw(self.body, self.x, self.y)
-	love.graphics.draw(self.p1_display, self.x + 50, self.y + 130, 0, 3, 3)
-	love.graphics.draw(self.p2_display, self.x + 50, self.y + 480, 0, 3, 3)
+	love.graphics.draw(self.p1_display, self.x + 70, self.y + 110, 0, 2, 2)
+	love.graphics.draw(self.p2_display, self.x + 70, self.y + 460, 0, 2, 2)
 
 	if self.turn == nil then
 		love.graphics.draw(self.occluder, self.x + self.width * (17 / 32), self.y + self.height * (28 / 64))

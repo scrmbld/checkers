@@ -29,9 +29,9 @@ function Board:new(x, y, turn)
 		state = {
 			{ 1, 0, 1, 0, 1, 0, 1, 0 },
 			{ 0, 1, 0, 1, 0, 1, 0, 1 },
+			{ 0, 0, 0, 0, 3, 0, 0, 0 },
 			{ 0, 0, 0, 0, 0, 0, 0, 0 },
-			{ 0, 0, 0, 0, 0, 0, 0, 0 },
-			{ 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 3, 0 },
 			{ 0, 0, 0, 0, 0, 0, 0, 0 },
 			{ 3, 0, 3, 0, 3, 0, 3, 0 },
 			{ 0, 3, 0, 3, 0, 3, 0, 3 },
@@ -41,6 +41,8 @@ function Board:new(x, y, turn)
 		p2_remaining = 8,
 		p1_taken = 0,
 		p2_taken = 0,
+
+		player_directions = { 1, -1 },
 		move_count = 0,
 	}
 
@@ -50,15 +52,19 @@ function Board:new(x, y, turn)
 	newObj.cell_h = math.floor(newObj.height / #newObj.state)
 	newObj.cell_w = math.floor(newObj.width / #newObj.state[1])
 
-	newObj.game_timer = Timer:new(newObj.x + newObj.width + 20, 20, 5, 0)
+	newObj.game_timer = Timer:new(newObj.x + newObj.width + 20, 20, 600, 0)
 
 	-- TODO: add assets for kings
 	newObj.piece_sprites = {
-		[1] = love.graphics.newImage("images/red_checker.png"), [3] = love.graphics.newImage("images/blue_checker.png"),
+		[1] = love.graphics.newImage("images/red_checker.png"),
+		[2] = love.graphics.newImage("images/red_king.png"),
+		[3] = love.graphics.newImage("images/blue_checker.png"),
+		[4] = love.graphics.newImage("images/blue_king.png"),
 	}
 
 	newObj.guides = {
-		["selected"] = love.graphics.newImage("images/selected.png"),
+		["pawn_selected"] = love.graphics.newImage("images/pawn_selected.png"),
+		["king_selected"] = love.graphics.newImage("images/king_selected.png"),
 		["dest"] = love.graphics.newImage("images/destination.png"),
 	}
 
@@ -119,7 +125,14 @@ function Board:renderGuides()
 	-- draw the selection highlight
 	local x = self.x + self.cell_w * (self.selected.x - 1)
 	local y = self.y + self.cell_h * (self.selected.y - 1)
-	love.graphics.draw(self.guides.selected, x, y)
+
+	local cell = self.state[self.selected.y][self.selected.x]
+
+	if cell == 1 or cell == 3 then
+		love.graphics.draw(self.guides.pawn_selected, x, y)
+	elseif cell == 2 or cell == 4 then
+		love.graphics.draw(self.guides.king_selected, x, y)
+	end
 
 	-- draw the available moves for the selected piece
 	if self.legal_moves == nil or self.selected == nil then
@@ -289,17 +302,37 @@ function Board:getLegalMoves()
 	local p1_moves = {}
 	local p2_moves = {}
 
+	if self.multijump ~= nil then
+		self:getMultiJumps(self.multijump)
+		return
+	end
+
 	-- iterate over every square on the board and get all legal moves for the checker piece in that location
 	for i, row in ipairs(self.state) do
 		for j, cell in ipairs(row) do
 			if self.movable[cell] then
 				local cell_coords = Coords:new(j, i)
-				local to_check = {
-					Coords:new(-1, -1),
-					Coords:new(-1, 1),
-					Coords:new(1, -1),
-					Coords:new(1, 1),
-				}
+				local to_check = {}
+
+				-- only check moves that are in an allowable direction (i.e., forward, unless the cell contains a king)
+				if cell == 1 then
+					-- red pawn
+					table.insert(to_check, Coords:new(-1, self.player_directions[1]))
+					table.insert(to_check, Coords:new(1, self.player_directions[1]))
+				elseif cell == 3 then
+					-- blue pawn
+					table.insert(to_check, Coords:new(-1, self.player_directions[2]))
+					table.insert(to_check, Coords:new(1, self.player_directions[2]))
+				elseif cell == 2 or cell == 4 then
+					-- king, either color
+					to_check = {
+						Coords:new(-1, 1),
+						Coords:new(-1, -1),
+						Coords:new(1, -1),
+						Coords:new(1, 1),
+					}
+				end
+
 				for _, v in ipairs(to_check) do
 					local current_move = Move:new(cell_coords, cell_coords + v)
 
@@ -353,10 +386,65 @@ function Board:getLegalMoves()
 	self.legal_moves[2] = p2_moves
 end
 
+---Assuming that the piece at position c has just performed a jump, look for a legal multijump
+---@param c table A Coords object containing the starting location of the piece to check for a multijump
+---@return boolean # true if a jump is found, false otherwise
+function Board:getMultiJumps(c)
+	local moves = {}
+	local cell = self.state[c.y][c.x]
+	local to_check = {}
+
+	local jump_found = false
+
+	-- only check moves that are in an allowable direction (i.e., forward, unless the cell contains a king)
+	if cell == 1 then
+		-- red pawn
+		table.insert(to_check, Coords:new(-2, self.player_directions[1] * 2))
+		table.insert(to_check, Coords:new(2, self.player_directions[1] * 2))
+	elseif cell == 3 then
+		-- blue pawn
+		table.insert(to_check, Coords:new(-2, self.player_directions[2] * 2))
+		table.insert(to_check, Coords:new(2, self.player_directions[2] * 2))
+	elseif cell == 2 or cell == 4 then
+		-- king, either color
+		to_check = {
+			Coords:new(-2, 2),
+			Coords:new(-2, -2),
+			Coords:new(2, -2),
+			Coords:new(2, 2),
+		}
+	end
+
+	for _, v in ipairs(to_check) do
+		local current_move = Move:new(c, c + v)
+
+		-- check that the current move is possible (i.e., in bounds, not blocked by another piece, etc.)
+		if not self:isPossible(current_move) then
+			goto continue
+		end
+
+		jump_found = true
+		moves[tostring(current_move)] = current_move
+		moves['jump'] = true
+
+		::continue::
+	end
+
+	self.legal_moves[self.turn] = moves
+
+	return jump_found
+end
+
 ---given a move, check if the move is a legal move and update the board state if it is
 ---@return boolean
 function Board:move(m)
+	print(self.turn)
 	-- if the clicked cell is in the list of legal moves, then move
+	print(m)
+	print('-----')
+	for i, v in pairs(self.legal_moves[self.turn]) do
+		print(tostring(i) .. ' / ' .. tostring(v))
+	end
 	if self.legal_moves[self.turn][tostring(m)] ~= nil then
 		-- move the selected piece to the m.final cell
 		self.state[m.final.y][m.final.x] = self.state[m.start.y][m.start.x]
@@ -366,6 +454,13 @@ function Board:move(m)
 		if m.magnitude == 2 then
 			local middle = getMidpoint(m)
 			self.state[middle.y][middle.x] = 0
+			-- check if the current piece has any more legal jumps
+			if self:getMultiJumps(m.final) then
+				self.multijump = m.final
+				return true
+			else
+				self.multijump = nil
+			end
 		end
 
 		-- update legal moves list
@@ -435,8 +530,28 @@ function Board:nextTurn()
 	self.selected = nil
 	self:countRemaining()
 
+	-- check for kings
+	self:kingCheck()
+
 	-- update timer
 	self.game_timer:start(self.turn)
+end
+
+---Checks if any non-kings are at the end of the board
+function Board:kingCheck()
+	local top = self.state[1]
+	for i, v in ipairs(top) do
+		if v == 3 then
+			self.state[1][i] = 4
+		end
+	end
+
+	local bottom = self.state[#self.state]
+	for i, v in ipairs(bottom) do
+		if v == 1 then
+			self.state[#self.state][i] = 2
+		end
+	end
 end
 
 ---computes the remaining pieces on the board for each player

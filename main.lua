@@ -1,4 +1,6 @@
 function love.load()
+	UnifontEX = love.graphics.newFont('font/UnifontExMono.ttf', 64)
+
 	Board = require("board")
 	Timer = require("timer")
 	love.window.setMode(1920, 1320)
