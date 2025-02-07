@@ -44,6 +44,8 @@ function Board:new(x, y, turn)
 
 		player_directions = { 1, -1 },
 		move_count = 0,
+
+		active = false
 	}
 
 	newObj.width = newObj.sp_background:getWidth()
@@ -438,13 +440,7 @@ end
 ---given a move, check if the move is a legal move and update the board state if it is
 ---@return boolean
 function Board:move(m)
-	print(self.turn)
 	-- if the clicked cell is in the list of legal moves, then move
-	print(m)
-	print('-----')
-	for i, v in pairs(self.legal_moves[self.turn]) do
-		print(tostring(i) .. ' / ' .. tostring(v))
-	end
 	if self.legal_moves[self.turn][tostring(m)] ~= nil then
 		-- move the selected piece to the m.final cell
 		self.state[m.final.y][m.final.x] = self.state[m.start.y][m.start.x]

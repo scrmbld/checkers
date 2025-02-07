@@ -4,10 +4,6 @@ local Timer = {
 
 local font = UnifontEX
 
-local function leftPad(s, c)
-
-end
-
 ---Given a length of time in seconds, convert tha time to a string in HH:MM:SS.ms format
 ---@param time number
 ---@param decimal_places number? Default to 1 if time is less than a minute, and 0 otherwise
@@ -98,8 +94,8 @@ function Timer:draw()
 	self.p2_display:set(secsToClock(self.player_times[2]))
 
 	love.graphics.draw(self.body, self.x, self.y)
-	love.graphics.draw(self.p1_display, self.x + 70, self.y + 110, 0, 2, 2)
-	love.graphics.draw(self.p2_display, self.x + 70, self.y + 460, 0, 2, 2)
+	love.graphics.draw(self.p1_display, self.x + 70, self.y + 110, 0, 1, 1)
+	love.graphics.draw(self.p2_display, self.x + 70, self.y + 460, 0, 1, 1)
 
 	if self.turn == nil then
 		love.graphics.draw(self.occluder, self.x + self.width * (17 / 32), self.y + self.height * (28 / 64))
