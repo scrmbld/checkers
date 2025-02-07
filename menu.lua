@@ -52,7 +52,7 @@ function Menu:new(x, y, title, buttons)
 		y = y,
 		sp_body = love.graphics.newImage("images/dark_menu.png"),
 
-		title_text_content = title,
+		title = title,
 		buttons = {},
 
 		active = false
@@ -61,12 +61,12 @@ function Menu:new(x, y, title, buttons)
 	newObj.width = newObj.sp_body:getWidth()
 	newObj.height = newObj.sp_body:getHeight()
 
-	newObj.title_display = love.graphics.newText(font, { { 1, 1, 1, 1 }, newObj.title_text_content })
+	newObj.title_display = love.graphics.newText(font, { { 1, 1, 1, 1 }, newObj.title })
 
 	if buttons ~= nil then
 		newObj.buttons = {}
 		for i, v in ipairs(buttons) do
-			local new_button = Button:new(newObj.x + 40, newObj.y + 40 + 100 + 90 * (i - 1), v[1], v[2])
+			local new_button = Button:new(newObj.x + 40, newObj.y + 40 + 100 + 120 * (i - 1), v[1], v[2])
 			newObj.buttons[#newObj.buttons + 1] = new_button
 			print(#newObj.buttons)
 		end
@@ -90,6 +90,8 @@ end
 function Menu:draw()
 	love.graphics.draw(self.sp_body, self.x, self.y)
 
+	-- update title text, just in case
+	self.title_display:set(self.title)
 	love.graphics.draw(self.title_display, self.x + 25, self.y + 40, 0, 0.7, 0.7)
 
 	if self.buttons ~= nil and #self.buttons > 0 then

@@ -9,6 +9,17 @@ local function getMidpoint(m)
 	return m.start + m.direction * half_magnitude
 end
 
+---Returns the number of items in a table
+---@param T table
+---@return number
+local function tableSize(T)
+	local count = 0
+	for _ in pairs(T) do
+		count = count + 1
+	end
+	return count
+end
+
 -- this is our export
 local Board = {
 	name = "Board"
@@ -29,9 +40,9 @@ function Board:new(x, y, turn)
 		state = {
 			{ 1, 0, 1, 0, 1, 0, 1, 0 },
 			{ 0, 1, 0, 1, 0, 1, 0, 1 },
-			{ 0, 0, 0, 0, 3, 0, 0, 0 },
 			{ 0, 0, 0, 0, 0, 0, 0, 0 },
-			{ 0, 0, 0, 0, 0, 0, 3, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0 },
 			{ 0, 0, 0, 0, 0, 0, 0, 0 },
 			{ 3, 0, 3, 0, 3, 0, 3, 0 },
 			{ 0, 3, 0, 3, 0, 3, 0, 3 },
@@ -89,8 +100,10 @@ function Board:update(delta)
 	if flag == true then
 		if self.turn == 1 then
 			print("Blue wins")
+			GameOver("Blue wins!")
 		else
 			print("Red wins")
+			GameOver("Red wins!")
 		end
 	end
 end
@@ -438,7 +451,7 @@ function Board:getMultiJumps(c)
 end
 
 ---given a move, check if the move is a legal move and update the board state if it is
----@return boolean
+---@return boolean # Returns true if we moved successfully, false otherwise
 function Board:move(m)
 	-- if the clicked cell is in the list of legal moves, then move
 	if self.legal_moves[self.turn][tostring(m)] ~= nil then
@@ -459,12 +472,19 @@ function Board:move(m)
 			end
 		end
 
-		-- update legal moves list
 		self:getLegalMoves()
 
-		self:nextTurn()
+		local ended = self:nextTurn()
 
 		self.move_count = self.move_count + 1
+
+		if ended then
+			return true
+		end
+
+		if tableSize(self.legal_moves[self.turn]) <= 0 then
+			GameOver("Draw")
+		end
 
 		return true
 	end
@@ -524,13 +544,26 @@ function Board:nextTurn()
 
 	-- deselect current piece
 	self.selected = nil
-	self:countRemaining()
 
 	-- check for kings
 	self:kingCheck()
 
+	-- check if someone has won
+	self:countRemaining()
+	if self.p1_remaining <= 0 then
+		print("Blue wins")
+		GameOver("Blue wins!")
+		return true
+	elseif self.p2_remaining <= 0 then
+		print("Red wins")
+		GameOver("Red wins!")
+		return true
+	end
+
 	-- update timer
 	self.game_timer:start(self.turn)
+
+	return false
 end
 
 ---Checks if any non-kings are at the end of the board

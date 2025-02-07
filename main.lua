@@ -2,15 +2,26 @@ local function greet()
 	print("hi!")
 end
 
---- Go to the main menu, ending any existing game
+---Go to the main menu, ending any existing game
 local function mainMenu()
 	main_menu.active = true
 	game_board.active = false
 end
 
+---Start a new game and hide the menu
 local function newGame()
 	main_menu.active = false
+
+	-- initialize game board
+	game_board = Board:new(20, 20)
 	game_board.active = true
+end
+
+---Calling this signals that the current game has ended
+function GameOver(result_text)
+	main_menu.title = result_text
+	main_menu.active = true
+	game_board.game_timer:stop()
 end
 
 function love.load()
@@ -23,7 +34,11 @@ function love.load()
 	love.window.setMode(1920, 1320)
 
 	-- initialize main menu
-	main_menu = Menu:new(20, 20, "Hello World!", { { "Hi There!", newGame } })
+	local menu_buttons = {
+		{ "New Game", newGame },
+		{ "Exit",     love.event.quit }
+	}
+	main_menu = Menu:new(20, 20, "Hello World!", menu_buttons)
 
 	-- initialize game board
 	game_board = Board:new(20, 20)
