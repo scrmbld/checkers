@@ -43,11 +43,21 @@ end
 function love.load()
 	UnifontEX = love.graphics.newFont('font/UnifontExMono.ttf', 64)
 
+	-- find the scale factor by which we should scale every love.graphics.draw
+	local base_resx = 1680
+	local base_resy = 1320
+	local resx = 1280
+	local resy = 720
+	ScaleFactor = resx / base_resx
+	if resy / base_resy < ScaleFactor then
+		ScaleFactor = resy / base_resy
+	end
+
 	Board = require("board")
 	Timer = require("timer")
 	Menu = require("menu")
 
-	love.window.setMode(1920, 1320)
+	love.window.setMode(resx, resy)
 
 	-- initialize main menu
 	local menu_buttons = {

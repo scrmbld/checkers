@@ -59,8 +59,8 @@ function Board:new(x, y, turn)
 		active = false
 	}
 
-	newObj.width = newObj.sp_background:getWidth()
-	newObj.height = newObj.sp_background:getHeight()
+	newObj.width = newObj.sp_background:getWidth() * ScaleFactor
+	newObj.height = newObj.sp_background:getHeight() * ScaleFactor
 
 	newObj.cell_h = math.floor(newObj.height / #newObj.state)
 	newObj.cell_w = math.floor(newObj.width / #newObj.state[1])
@@ -110,7 +110,7 @@ end
 
 function Board:draw()
 	-- first, draw the board
-	love.graphics.draw(self.sp_background, self.x, self.y)
+	love.graphics.draw(self.sp_background, self.x, self.y, 0, ScaleFactor, ScaleFactor)
 	-- then, draw the pieces
 	for i, row in ipairs(self.state) do
 		for j, col in ipairs(self.state) do
@@ -122,7 +122,7 @@ function Board:draw()
 
 			-- draw the piece
 			if sp then
-				love.graphics.draw(sp, x, y)
+				love.graphics.draw(sp, x, y, 0, ScaleFactor, ScaleFactor)
 			end
 		end
 	end
@@ -144,9 +144,9 @@ function Board:renderGuides()
 	local cell = self.state[self.selected.y][self.selected.x]
 
 	if cell == 1 or cell == 3 then
-		love.graphics.draw(self.guides.pawn_selected, x, y)
+		love.graphics.draw(self.guides.pawn_selected, x, y, 0, ScaleFactor, ScaleFactor)
 	elseif cell == 2 or cell == 4 then
-		love.graphics.draw(self.guides.king_selected, x, y)
+		love.graphics.draw(self.guides.king_selected, x, y, 0, ScaleFactor, ScaleFactor)
 	end
 
 	-- draw the available moves for the selected piece
@@ -181,7 +181,7 @@ function Board:renderGuides()
 	for _, v in ipairs(destinations) do
 		local x = self.x + self.cell_w * (v.x - 1)
 		local y = self.y + self.cell_w * (v.y - 1)
-		love.graphics.draw(self.guides.dest, x, y)
+		love.graphics.draw(self.guides.dest, x, y, 0, ScaleFactor, ScaleFactor)
 	end
 end
 
