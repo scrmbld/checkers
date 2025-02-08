@@ -6,14 +6,30 @@ end
 local function mainMenu()
 	main_menu.active = true
 	game_board.active = false
+	pause_menu.active = false
 end
 
 ---Start a new game and hide the menu
 local function newGame()
 	main_menu.active = false
+	pause_menu.active = false
 
 	-- initialize game board
 	game_board = Board:new(20, 20)
+	game_board.active = true
+end
+
+local function Pause()
+	main_menu.active = false
+	game_board.active = false
+
+	pause_menu.active = true
+end
+
+local function Unpause()
+	pause_menu.active = false
+	main_menu.active = false
+
 	game_board.active = true
 end
 
@@ -38,7 +54,14 @@ function love.load()
 		{ "New Game", newGame },
 		{ "Exit",     love.event.quit }
 	}
-	main_menu = Menu:new(20, 20, "Hello World!", menu_buttons)
+	local pause_buttons = {
+		{ "Resume",   Unpause },
+		{ "New Game", newGame },
+		{ "Exit",     love.event.quit }
+	}
+
+	main_menu = Menu:new(20, 20, "Checkers", menu_buttons)
+	pause_menu = Menu:new(20, 20, "Game Paused", pause_buttons)
 
 	-- initialize game board
 	game_board = Board:new(20, 20)
@@ -53,6 +76,19 @@ function love.update(delta)
 	end
 end
 
+function love.keypressed(key, scancode, isrepeat)
+	if game_board.active and key == "escape" and isrepeat == false then
+		print("pause")
+		Pause()
+		return
+	end
+	if pause_menu.active and key == "escape" and isrepeat == false then
+		print("unpause")
+		Unpause()
+		return
+	end
+end
+
 function love.mousepressed(x, y, button)
 	if game_board.active then
 		game_board:mousepressed(x, y, button)
@@ -60,13 +96,18 @@ function love.mousepressed(x, y, button)
 	if main_menu.active then
 		main_menu:mousepressed(x, y, button)
 	end
+	if pause_menu.active then
+		pause_menu:mousepressed(x, y, button)
+	end
 end
 
 function love.draw()
-	if game_board.active then
-		game_board:draw()
-	end
+	game_board:draw()
+
 	if main_menu.active then
 		main_menu:draw()
+	end
+	if pause_menu.active then
+		pause_menu:draw()
 	end
 end

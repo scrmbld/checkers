@@ -68,7 +68,6 @@ function Menu:new(x, y, title, buttons)
 		for i, v in ipairs(buttons) do
 			local new_button = Button:new(newObj.x + 40, newObj.y + 40 + 100 + 120 * (i - 1), v[1], v[2])
 			newObj.buttons[#newObj.buttons + 1] = new_button
-			print(#newObj.buttons)
 		end
 	end
 
