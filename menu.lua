@@ -21,8 +21,8 @@ function Button:new(x, y, text_content, callback)
 		callback = callback,
 	}
 
-	newObj.width = newObj.sp_button:getWidth() * ScaleFactor
-	newObj.height = newObj.sp_button:getHeight() * ScaleFactor
+	newObj.width = newObj.sp_button:getWidth()
+	newObj.height = newObj.sp_button:getHeight()
 
 	newObj.text_display = love.graphics.newText(font, { { 0, 0, 0, 1 }, newObj.text_content })
 
@@ -42,9 +42,8 @@ function Button:mousepressed(x, y, btn)
 end
 
 function Button:draw()
-	love.graphics.draw(self.sp_button, self.x, self.y, 0, ScaleFactor, ScaleFactor)
-	love.graphics.draw(self.text_display, self.x + 20 * ScaleFactor, self.y + 20 * ScaleFactor, 0, 0.5 * ScaleFactor,
-		0.5 * ScaleFactor)
+	love.graphics.draw(self.sp_button, self.x, self.y)
+	love.graphics.draw(self.text_display, self.x + 20, self.y + 20, 0, 0.5, 0.5)
 end
 
 function Menu:new(x, y, title, buttons)
@@ -59,8 +58,8 @@ function Menu:new(x, y, title, buttons)
 		active = false
 	}
 
-	newObj.width = newObj.sp_body:getWidth() * ScaleFactor
-	newObj.height = newObj.sp_body:getHeight() * ScaleFactor
+	newObj.width = newObj.sp_body:getWidth()
+	newObj.height = newObj.sp_body:getHeight()
 
 	newObj.title_display = love.graphics.newText(font, { { 1, 1, 1, 1 }, newObj.title })
 
@@ -68,8 +67,7 @@ function Menu:new(x, y, title, buttons)
 		newObj.buttons = {}
 		for i, v in ipairs(buttons) do
 			-- Menu origin + title text height + button image margin + button height
-			local new_button = Button:new(newObj.x + (40 * ScaleFactor),
-				newObj.y + (100 * ScaleFactor) + (40 * ScaleFactor) + 120 * (i - 1) * ScaleFactor, v[1], v[2])
+			local new_button = Button:new(newObj.x + 40, newObj.y + 100 + 40 + 120 * (i - 1), v[1], v[2])
 			newObj.buttons[#newObj.buttons + 1] = new_button
 		end
 	end
@@ -90,12 +88,11 @@ function Menu:mousepressed(x, y, btn)
 end
 
 function Menu:draw()
-	love.graphics.draw(self.sp_body, self.x, self.y, 0, ScaleFactor, ScaleFactor)
+	love.graphics.draw(self.sp_body, self.x, self.y)
 
 	-- update title text, just in case
 	self.title_display:set(self.title)
-	love.graphics.draw(self.title_display, self.x + (25 * ScaleFactor), self.y + (40 * ScaleFactor), 0, 0.8 * ScaleFactor,
-		0.8 * ScaleFactor)
+	love.graphics.draw(self.title_display, self.x + 25, self.y + 40, 0, 0.8, 0.8)
 
 	if self.buttons ~= nil and #self.buttons > 0 then
 		for i, v in ipairs(self.buttons) do

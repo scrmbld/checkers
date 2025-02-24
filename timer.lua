@@ -61,8 +61,8 @@ function Timer:new(x, y, start_time, increment)
 		increment = increment,
 	}
 
-	newObj.width = newObj.body:getWidth() * ScaleFactor
-	newObj.height = newObj.body:getHeight() * ScaleFactor
+	newObj.width = newObj.body:getWidth()
+	newObj.height = newObj.body:getHeight()
 
 	newObj.p1_display = love.graphics.newText(font, secsToClock(newObj.player_times[1]))
 	newObj.p2_display = love.graphics.newText(font, secsToClock(newObj.player_times[2]))
@@ -93,21 +93,16 @@ function Timer:draw()
 	self.p1_display:set(secsToClock(self.player_times[1]))
 	self.p2_display:set(secsToClock(self.player_times[2]))
 
-	love.graphics.draw(self.body, self.x, self.y, 0, ScaleFactor, ScaleFactor)
-	love.graphics.draw(self.p1_display, self.x + (70 * ScaleFactor), self.y + (110 * ScaleFactor), 0, ScaleFactor,
-		ScaleFactor)
-	love.graphics.draw(self.p2_display, self.x + (70 * ScaleFactor), self.y + (460 * ScaleFactor), 0, ScaleFactor,
-		ScaleFactor)
+	love.graphics.draw(self.body, self.x, self.y)
+	love.graphics.draw(self.p1_display, self.x + 70, self.y + 110)
+	love.graphics.draw(self.p2_display, self.x + 70, self.y + 460)
 
 	if self.turn == nil then
-		love.graphics.draw(self.occluder, self.x + self.width * (17 / 32), self.y + self.height * (28 / 64), 0,
-			ScaleFactor, ScaleFactor)
+		love.graphics.draw(self.occluder, self.x + self.width * (17 / 32), self.y + self.height * (28 / 64))
 	elseif self.turn == 1 then
-		love.graphics.draw(self.occluder, self.x + self.width * (17 / 32), self.y + self.height * (28 / 64), 0,
-			ScaleFactor, ScaleFactor)
+		love.graphics.draw(self.occluder, self.x + self.width * (17 / 32), self.y + self.height * (28 / 64))
 	elseif self.turn == 2 then
-		love.graphics.draw(self.occluder, self.x + self.width * (6 / 32), self.y + self.height * (28 / 64), 0,
-			ScaleFactor, ScaleFactor)
+		love.graphics.draw(self.occluder, self.x + self.width * (6 / 32), self.y + self.height * (28 / 64))
 	end
 end
 

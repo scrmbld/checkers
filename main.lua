@@ -41,23 +41,18 @@ function GameOver(result_text)
 end
 
 function love.load()
-	UnifontEX = love.graphics.newFont('font/UnifontExMono.ttf', 64)
-
 	-- find the scale factor by which we should scale every love.graphics.draw
-	local base_resx = 1680
-	local base_resy = 1320
-	local resx = 1280
-	local resy = 720
-	ScaleFactor = resx / base_resx
-	if resy / base_resy < ScaleFactor then
-		ScaleFactor = resy / base_resy
-	end
+
+	UnifontEX = love.graphics.newFont('font/UnifontExMono.ttf', 64)
 
 	Board = require("board")
 	Timer = require("timer")
 	Menu = require("menu")
+	Settings = require("settings")
 
-	love.window.setMode(resx, resy)
+	GameSettings = Settings:New()
+	GameSettings:Apply()
+
 
 	-- initialize main menu
 	local menu_buttons = {
@@ -100,6 +95,10 @@ function love.keypressed(key, scancode, isrepeat)
 end
 
 function love.mousepressed(x, y, button)
+	-- adjust for scaling
+	x = x / GameSettings.scaleFactor
+	y = y / GameSettings.scaleFactor
+
 	if game_board.active then
 		game_board:mousepressed(x, y, button)
 	end
@@ -112,6 +111,7 @@ function love.mousepressed(x, y, button)
 end
 
 function love.draw()
+	love.graphics.scale(GameSettings.scaleFactor, GameSettings.scaleFactor)
 	game_board:draw()
 
 	if main_menu.active then
