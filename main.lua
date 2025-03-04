@@ -114,7 +114,6 @@ function love.load()
 	local pause_buttons = {
 		{ text = "Resume",   onClick = Unpause,         type = "button" },
 		{ text = "New Game", onClick = newGame,         type = "button" },
-		{ text = "Settings", onClick = openSettings,    type = "button" },
 		{ text = "Exit",     onClick = love.event.quit, type = "button" }
 	}
 	local fullscreen_text = ""
